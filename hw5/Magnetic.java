@@ -1,21 +1,21 @@
-public class MovingObject {
+public class Magnetic {
 
 	   double cof,dt;
 	   double x,y,vx,vy,E;
-	   private double ax,ay,r,r2;
-	   private double s,fs,bs;
+	   private double ax,ay,r,r2, theta;
+	   private double s,fs,bs,eps;
 	   private double vxold,vyold,xmid,ymid,xold,yold;
-       public MovingObject(){System.out.println("A new moving object is created.");
+       public Magnetic(){System.out.println("A new moving object is created.");
        }
 //------------------object properties
 	   public void energy(){
 			E=0.5*(vx*vx+vy*vy)-1./Math.sqrt(x*x+y*y);
 	   }
 	   public void accel(){
-			r2 =x*x+y*y;
-			r  =Math.sqrt(r2);
-			ax=-x/r/r2;
-			ay=-y/r/r2;
+			theta = dt/x/x;
+
+			ax=  (-vy)*Math.sin(theta) - (vx)*(1. - Math.cos(theta));
+			ay=  (vx)*Math.sin(theta) - (vy)*(1. - Math.cos(theta));
 	   }
 //------------------object motion
 	   public void positionstep(double cof){
@@ -23,9 +23,13 @@ public class MovingObject {
 	    			      y = y+vy*dt*cof;
 	   }
 	   public void velocitystep(double cof){
-	                      accel();
-	    			      vx = vx+ax*dt*cof;
-	    			      vy = vy+ay*dt*cof;
+	                      //accel();
+												theta = cof*dt/x/x;
+
+												ax=  (-vy)*Math.sin(theta) - (vx)*(1. - Math.cos(theta));
+												ay=  (vx)*Math.sin(theta) - (vy)*(1. - Math.cos(theta));
+	    			      vx = vx+ax;
+	    			      vy = vy+ay;
 	   }
 
 	   public void sym1bstep(double cof){
@@ -124,8 +128,8 @@ public class MovingObject {
                   return;
      }
      public void FR4_b_step(){
-                  double s =  Math.pow(2.,1./3.);
-                  double eps = 1. / (2. - s);
+                  s =  Math.pow(2.,1./3.);
+                  eps = 1. / (2. - s);
                   this.sym2bstep(eps);
                   this.sym2bstep(-s*eps);
                   this.sym2bstep(eps);

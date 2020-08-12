@@ -33,8 +33,8 @@ public class KeplerMovePlotApp_b {
     double E;
     double E_err = 0.;
 
-    MovingObject planet =new MovingObject();
-    MovingObject asteroid = new MovingObject();
+    MagneticObject planet =new MagneticObject();
+    MagneticObject asteroid = new MagneticObject();
 
     planet.dt = dt;
     planet.x  = x0;

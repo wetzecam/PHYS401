@@ -1,26 +1,41 @@
 import java.awt.*;
 import org.opensourcephysics.display.*;
 
-public class MovingKObject implements Drawable {
+public class MovingRObject implements Drawable {
 
 	   double cof,dt,t;
 	   double x,y,vx,vy,E;
 	   private double ax,ay,r,r2;
 	   Trail trail = new Trail();
      int nspeed;
+		 double rcos,rsin;
 
-       public MovingKObject(){System.out.println("A new moving object is created.");
+       public MovingRObject(){System.out.println("A new moving object is created.");
        }
 //------------------object properties
 	   public void energy(){
 			E=0.5*(vx*vx+vy*vy)-1./Math.sqrt(x*x+y*y);
 	   }
 
-	   public void accel(){
-			r2 =x*x+y*y;
-			r  =Math.sqrt(r2);
-			ax=-x/r/r2;
-			ay=-y/r/r2;
+	   public void accel(double t){
+			double dx1 = x - (0.5)*Math.cos(t);
+			double dy1 = y - (0.5)*Math.sin(t);
+
+			double dr1_2 = dx1*dx1 + dy1*dy1;
+			double dr1 = Math.sqrt(dr1_2);
+
+			double dx2 = x + (0.5)*Math.cos(t);
+			double dy2 = y + (0.5)*Math.sin(t);
+
+			double dr2_2 = dx2*dx2 + dy2*dy2;
+			double dr2 = Math.sqrt(dr2_2);
+			rcos = Math.cos(t);
+			rsin = Math.sin(t);
+
+			//r2 =x*x+y*y;
+			//r  =Math.sqrt(r2);
+			ax= (-0.5)*((dx1/dr1)/dr1_2 + (dx2/dr2)/dr2_2);
+			ay= (-0.5)*((dy1/dr1)/dr1_2 + (dy2/dr2)/dr2_2);
 	   }
 //------------------object motion
 	   public void positionstep(double cof){
@@ -28,7 +43,7 @@ public class MovingKObject implements Drawable {
 	    			      y = y+vy*dt*cof;
 	   }
 	   public void velocitystep(double cof){
-	                      accel();
+	                      accel(t);
 	    			      vx = vx+ax*dt*cof;
 	    			      vy = vy+ay*dt*cof;
 	   }
@@ -42,8 +57,11 @@ public class MovingKObject implements Drawable {
 	   }
 	   public void sym2bstep(double cof){
 	    			  positionstep(0.5*cof);
+							t += 0.5*cof*dt;
 	    			  velocitystep(1.0*cof);
 	    			  positionstep(0.5*cof);
+							t += 0.5*cof*dt;
+
 	   }
 	   public void sym2astep(double cof){
 	    			  velocitystep(0.5*cof);
@@ -138,15 +156,21 @@ public class MovingKObject implements Drawable {
 
      public void doStep(double cof){
               sym2bstep(cof);
-			        t=t+dt;
-              trail.addPoint(x, y);
+			        //t=t+dt;
+              trail.addPoint(x*rcos + y*rsin, y*rcos - x*rsin);
 	   }
-       public void draw(DrawingPanel panel, Graphics g) {
+     public void draw_trans(DrawingPanel panel, Graphics g) {
 	        int irad=8;
             int xpix = panel.xToPix(0.5*Math.cos(t))-irad;
             int ypix = panel.yToPix(0.5*Math.sin(t))-irad;   //sun at the origin
             g.setColor(Color.BLUE);
             g.fillOval(xpix, ypix, 2*irad, 2*irad);
+
+						// Second Sun
+					 xpix = panel.xToPix(-0.5*Math.cos(t))-irad;
+					 ypix = panel.yToPix(-0.5*Math.sin(t))-irad;   //sun at the origin
+				   g.setColor(Color.GREEN);
+				   g.fillOval(xpix, ypix, 2*irad, 2*irad);
 	        irad=5;            //smaller moving planet
             xpix = panel.xToPix(x)-irad;
             ypix = panel.yToPix(y)-irad;
@@ -154,5 +178,26 @@ public class MovingKObject implements Drawable {
             g.fillOval(xpix, ypix, 2*irad, 2*irad);
             trail.draw(panel, g);
        }
+
+			 public void draw(DrawingPanel panel, Graphics g) {
+		        int irad=8;
+	            int xpix = panel.xToPix(0.5*Math.cos(0.0))-irad;
+	            int ypix = panel.yToPix(0.5*Math.sin(0.0))-irad;   //sun at the origin
+	            g.setColor(Color.BLUE);
+	            g.fillOval(xpix, ypix, 2*irad, 2*irad);
+
+							// Second Sun
+						 xpix = panel.xToPix(-0.5*Math.cos(0.0))-irad;
+						 ypix = panel.yToPix(-0.5*Math.sin(0.0))-irad;   //sun at the origin
+					   g.setColor(Color.GREEN);
+					   g.fillOval(xpix, ypix, 2*irad, 2*irad);
+		        irad=5;            //smaller moving planet
+	            xpix = panel.xToPix(x*rcos + y*rsin)-irad;
+	            ypix = panel.yToPix(y*rcos - x*rsin)-irad;
+	            g.setColor(Color.RED);
+	            g.fillOval(xpix, ypix, 2*irad, 2*irad);
+	            trail.draw(panel, g);
+	     }
+
 
 }

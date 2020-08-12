@@ -22,7 +22,7 @@ public class PlanetKApp extends AbstractSimulation {
    * Steps the time.
    */
   public void doStep() {
-      planet.trail.clear();
+    //planet.trail.clear();
 
       for(int i = 0;i<planet.nspeed;i++) { // do 10 steps between screen draws
       planet.doStep(1.0);       // advances time
